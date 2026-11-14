@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 LLM locaux face à la classification de textes : lesquels sont crédibles ?</title>
+<meta name="description" content="Benchmark de 6 LLM locaux en classification de textes en français : justesse, stabilité, temps de réponse.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🏷️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--ink:#0f1b2d;--mut:#5b6678;--bg:#f2f5fa;--card:#fff;--line:#dde3ed;--ok:#0e9f8e;--var:#3b6fd8;--en:#e8553d;--ko:#b9c2d1;--to:#f0a12b;
+--h:'Bricolage Grotesque','Trebuchet MS',sans-serif;--b:'Figtree','Segoe UI',Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--b)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+nav{position:sticky;top:0;z-index:20;background:rgba(242,245,250,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;gap:4px;padding:10px 16px;overflow-x:auto;white-space:nowrap}
+nav a{color:var(--ink);text-decoration:none;font-weight:600;font-size:14px;padding:6px 12px;border-radius:99px}
+nav a:hover,nav a:focus-visible{background:var(--ink);color:#fff;outline:none}
+header{background:var(--ink);color:#fff;padding:64px 20px 56px}
+.w{max-width:1040px;margin:0 auto}
+h1{font:800 clamp(34px,6vw,64px)/1.02 var(--h);margin:0 0 18px;letter-spacing:-.02em;max-width:16ch}
+header p{max-width:60ch;color:#c5cfdf;font-size:18px;margin:0 0 28px}
+.facts{display:flex;flex-wrap:wrap;gap:12px}
+.facts div{border:1px solid #2c3d57;border-radius:12px;padding:10px 16px}
+.facts b{font:700 28px var(--h);display:block;line-height:1.1}.facts span{font-size:13px;color:#9fb0c9}
+section{padding:56px 20px 8px}
+h2{font:700 clamp(26px,4vw,38px)/1.1 var(--h);margin:0 0 8px;letter-spacing:-.01em}
+.lead{color:var(--mut);max-width:68ch;margin:0 0 24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:20px;overflow-x:auto}
+.card h3{font:700 19px var(--h);margin:0 0 4px}.card .sub{color:var(--mut);font-size:14px;margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}.step b{font-family:var(--h);font-size:17px}.step p{margin:4px 0 0;font-size:14px;color:var(--mut)}
+.row{display:grid;grid-template-columns:150px 1fr 74px;gap:12px;align-items:center;margin:9px 0;min-width:520px}
+.row .n{font-weight:600;font-size:14px;overflow-wrap:anywhere}.row .v{font:700 15px var(--h);text-align:right}
+.bar{display:flex;height:24px;border-radius:6px;overflow:hidden;background:#eef1f6}
+.bar i{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin:0 0 14px}
+.leg s{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px;text-decoration:none}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left;font-weight:600}
+th{font-weight:600;color:var(--mut);font-size:13px}
+.hm td{text-align:center;font:700 15px var(--h);border:3px solid #fff;border-radius:8px;padding:10px 4px;min-width:84px}
+.hm td:first-child{text-align:left;font:600 14px var(--b);border:0}.hm th{white-space:normal;vertical-align:bottom;max-width:100px}
+.hm td.t{text-align:left;font:400 13px var(--b);color:var(--mut);border:0;min-width:200px}
+.callout{border-left:5px solid var(--ok);background:#e7f6f3;padding:14px 18px;border-radius:0 12px 12px 0;margin:0 0 20px}
+.callout.w2{border-color:var(--to);background:#fdf3e1}
+.ex{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:6px}
+.ex div{border:1px solid var(--line);border-radius:10px;padding:12px;font-size:14px}
+.ex b{display:block;margin-bottom:2px}
+.ex code,.q code{background:#eef1f6;border-radius:5px;padding:1px 6px;font-size:13px}
+.q{display:grid;grid-template-columns:1fr 210px;gap:6px 16px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;min-width:520px}
+.q small{color:var(--mut)}
+ul.ins{padding:0;list-style:none;display:grid;gap:12px}
+ul.ins li{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+ul.ins b{font-family:var(--h);font-size:17px}
+svg text{font-family:var(--b)}
+footer{padding:40px 20px 60px;color:var(--mut);font-size:14px}
+@media(max-width:560px){.row{grid-template-columns:110px 1fr 60px}.q{grid-template-columns:1fr}}
+
+.hm td.l{font-size:12px;font-weight:600;padding:8px 4px}.hm th small{display:block;font-weight:400}
+.tag{display:inline-block;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
+.v1{background:#0e9f8e;color:#fff}.v2{background:#3b6fd8;color:#fff}.v3{background:#f0a12b;color:#0f1b2d}.v4{background:#b9c2d1;color:#0f1b2d}
+.ins li p{margin:6px 0 0}
+</style></head><body>
+<nav aria-label="Sections"><a href="#protocole">Protocole</a><a href="#classement">1. Classement</a><a href="#detail">2. Par type</a><a href="#stabilite">3. Stabilité</a><a href="#temps">4. Temps</a><a href="#conclusion">5. Conclusion</a></nav>
+<header><div class="w">
+<h1>6 LLM locaux, 141 textes à classer : lesquels sont crédibles ?</h1>
+<p>Sentiment, thème, intention, avis multi-aspects : chaque modèle a-t-il la bonne étiquette, la redonne-t-il à chaque fois, et en combien de temps ?</p>
+<div class="facts"><div><b>6</b><span>modèles testés</span></div><div><b>141</b><span>propositions, 8 tâches</span></div><div><b id="f1"></b><span>réponses (5 passages chacune)</span></div><div><b id="f2"></b><span>de score pour le meilleur modèle</span></div></div>
+</div></header>
+
+<section id="protocole"><div class="w">
+<h2>Le protocole</h2><p class="lead">Chaque proposition est soumise 5 fois de suite à chaque modèle (température 0, graine fixée, thinking désactivé). Les modalités sont présentées dans un ordre différent à chaque passage : un modèle qui répond selon la position et non le sens se fait donc piéger.</p>
+<div class="grid">
+<div class="step"><b>8 tâches</b><p>Sentiment (2 et 3 classes), thème (5, 5 + « Autre », 10), intention (5), et deux tâches à choix multiples : avis multi-aspects (6) et multi-thèmes (10).</p></div>
+<div class="step"><b>4 niveaux de difficulté</b><p>De 1 (évident) à 4 (ironie, négations, cas limites). Les niveaux 1 à 3 pèsent chacun environ 43 propositions, le niveau 4 seulement 9.</p></div>
+<div class="step"><b>Notation</b><p>Modalité unique : juste (1) ou faux (0). Modalités multiples : score de Jaccard (modalités correctes ÷ modalités attendues ou proposées), ce qui valorise les réponses partielles.</p></div>
+<div class="step"><b>Données</b><p>Deux lignes du CSV, décalées par la mise en forme d'une réponse de mistral:7b, ont été corrigées (réponse brute recollée) et conservées.</p></div>
+</div></div></section>
+
+<section id="classement"><div class="w">
+<h2>1. Classement global</h2>
+<p class="lead">Score moyen sur l'ensemble des passages : 1 pour une réponse exacte, Jaccard pour les questions à choix multiples. La barre verte donne le score, la fine ligne l'intervalle de confiance à 95 % (141 propositions).</p>
+<div class="card"><div id="c1"></div></div>
+<div class="card"><h3>Le détail du classement</h3><p class="sub">« Exact » : réponse parfaite uniquement. « Macro » : moyenne des 8 tâches à poids égal. « Format » : le modèle a répondu uniquement par le libellé demandé.</p><div id="c1b"></div></div>
+</div></section>
+
+<section id="detail"><div class="w">
+<h2>2. Qui est bon dans quoi ?</h2>
+<p class="lead">Score moyen par type de tâche, par nombre de modalités, par mode de réponse et par difficulté. Plus c'est foncé, meilleur c'est.</p>
+<div class="card"><h3>Par type de tâche</h3><p class="sub">Sous chaque tâche : nombre de propositions et de modalités.</p><div id="c2a"></div></div>
+<div class="card"><h3>Par nombre de modalités</h3><p class="sub">Les cas à 5, 6 et 10 modalités mélangent choix unique et multiple (voir ci-dessous).</p><div id="c2b"></div></div>
+<div class="card"><h3>Modalité unique contre modalités multiples</h3><div id="c2c"></div></div>
+<div class="card"><h3>Par niveau de difficulté</h3><p class="sub">Le niveau 4 ne compte que 9 propositions : à lire avec prudence.</p><div id="c2d"></div></div>
+<div class="card"><h3>Les réponses partielles aux choix multiples</h3><p class="sub">Sur les 34 propositions à choix multiples × 5 passages (170 réponses par modèle). Une réponse « partielle » contient au moins une bonne modalité sans être complète. Rappel : part des bonnes modalités retrouvées. Précision : part des modalités proposées qui sont bonnes.</p>
+<div class="leg"><span><s style="background:var(--ok)"></s>Complète</span><span><s style="background:var(--var)"></s>Partielle, sans erreur (incomplète)</span><span><s style="background:var(--to)"></s>Partielle, avec modalités en trop</span><span><s style="background:var(--ko)"></s>Aucune bonne modalité</span></div><div id="c2e"></div></div>
+<div class="card"><h3>Les propositions les plus ratées</h3><p class="sub">Score moyen des 6 modèles sur les 6 propositions les moins bien réussies. Certaines tiennent peut-être à une étiquette de référence discutable (par exemple « Information commerciale » pour une question sur la compatibilité Mac).</p><div id="c2f"></div></div>
+</div></section>
+
+<section id="stabilite"><div class="w">
+<h2>3. Stabilité des réponses</h2>
+<p class="lead">Chaque proposition est posée 5 fois. Deux réponses à choix multiple sont considérées identiques si elles contiennent les mêmes modalités, quel que soit l'ordre. Comme l'ordre des options change à chaque passage, ce test est exigeant.</p>
+<div class="card"><h3>Comportement sur 5 passages</h3><p class="sub">141 propositions par modèle.</p>
+<div class="leg"><span><s style="background:var(--ok)"></s>5 bonnes réponses sur 5</span><span><s style="background:var(--to)"></s>Mixte (parfois juste, parfois faux)</span><span><s style="background:var(--ko)"></s>5 fausses réponses sur 5</span></div><div id="c3a"></div></div>
+<div class="card"><h3>Réponses identiques aux 5 passages</h3><div id="c3b"></div></div>
+</div></section>
+
+<section id="temps"><div class="w">
+<h2>4. Le temps de réponse</h2>
+<p class="lead">Temps par réponse, en échelle logarithmique. La boîte contient la moitié centrale des réponses, le trait épais est la médiane, les cercles sont les valeurs exceptionnelles. Les temps dépendent de la machine : seuls les écarts entre modèles comptent.</p>
+<div class="card"><h3>Toutes les réponses</h3><div id="c4a"></div></div>
+<div class="card"><h3>Bonnes réponses uniquement</h3><div id="c4b"></div></div>
+<div class="card"><h3>Résumé</h3><div id="c4c"></div></div>
+<div class="card"><h3>Médiane par niveau de difficulté</h3><div id="c4d"></div></div>
+<div class="card"><h3>Médiane par thématique</h3><p class="sub">Les tâches à choix multiples sont plus lentes (réponses plus longues).</p><div id="c4e"></div></div>
+<div class="card"><h3>Vitesse contre justesse</h3><p class="sub">Le coin en haut à gauche est le meilleur : rapide et juste.</p><div id="c4f"></div></div>
+</div></section>
+
+<section id="conclusion"><div class="w">
+<h2>5. Conclusion : qui est crédible, et pour quoi ?</h2>
+<p class="lead">Seuil retenu pour une tâche : <span class="tag v1">Fiable ≥ 90 %</span><span class="tag v2">À contrôler 75–90 %</span><span class="tag v3">Fragile 50–75 %</span><span class="tag v4">Non crédible &lt; 50 %</span></p>
+<div class="card"><div id="c5a"></div></div>
+<ul class="ins" id="ins"></ul>
+<div class="callout w2"><b>À garder en tête.</b> Quelques dizaines de propositions par tâche seulement (8 pour « Autre », 16 pour le sentiment binaire) : les écarts de quelques points ne sont pas significatifs. Les temps ont été mesurés sur une seule machine, modèles testés l'un après l'autre. Une seule formulation de consigne a été essayée.</div>
+</div></section>
+<footer><div class="w">Données : benchmark réalisé les 10 et 11 novembre 2026, température 0, 5 passages par proposition.</div></footer>
+
+<script>
+const D={"m": [{"name": "gemma4:e4b", "score": 97.47058156028369, "exact": 94.60992907801419, "lo": 93.36122586334578, "hi": 99.0618349147732, "fmt": 100.0, "macro": 97.34954385964912, "ident": 95.0354609929078, "modal": 98.15602836879434, "identU": 100.0, "identM": 79.41176470588235, "always": 130, "mixed": 7, "never": 4, "stwrong": 4, "mc": {"full": 137, "part": 30, "mix": 1, "zero": 2}, "rec": 90.58823529411765, "prec": 99.03536977491962, "tb": {"all": {"q1": 2.78, "med": 3.04, "q3": 3.27, "lo": 2.34, "hi": 4.0, "mean": 2.8740425531914893, "n": 705, "out": [0.44, 0.46, 0.46, 0.47, 0.47, 0.47, 0.47, 0.48, 0.48, 0.48, 0.48, 0.48, 0.49, 0.49, 0.49, 0.49, 0.5, 0.51, 0.54, 4.04, 4.09, 4.13, 4.21, 4.29, 4.31]}, "ok": {"q1": 2.78, "med": 3.02, "q3": 3.1950000000000003, "lo": 2.34, "hi": 3.81, "mean": 2.830344827586207, "n": 667, "out": [0.44, 0.46, 0.47, 0.47, 0.47, 0.47, 0.48, 0.48, 0.48, 0.48, 0.49, 0.49, 0.49, 0.5, 0.51, 0.7, 3.85, 3.87, 3.91, 3.94, 4.04, 4.09, 4.14, 4.22, 4.31]}}, "tps": 16.0}, {"name": "gemma4:e2b", "score": 93.3807659574468, "exact": 89.21985815602837, "lo": 88.0209369621931, "hi": 96.4394390623744, "fmt": 98.72340425531915, "macro": 90.38281929824561, "ident": 87.94326241134752, "modal": 96.17021276595744, "identU": 95.32710280373831, "identM": 64.70588235294117, "always": 117, "mixed": 15, "never": 9, "stwrong": 7, "mc": {"full": 121, "part": 37, "mix": 11, "zero": 1}, "rec": 86.47058823529412, "prec": 96.07843137254902, "tb": {"all": {"q1": 1.41, "med": 1.53, "q3": 1.73, "lo": 1.16, "hi": 2.2, "mean": 1.490241134751773, "n": 705, "out": [0.25, 0.26, 0.26, 0.26, 0.27, 0.27, 0.27, 0.27, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.29, 0.29, 0.29, 0.29, 0.29, 0.3, 0.31, 2.24, 2.5]}, "ok": {"q1": 1.4, "med": 1.52, "q3": 1.66, "lo": 1.16, "hi": 2.05, "mean": 1.4480763116057234, "n": 629, "out": [0.25, 0.26, 0.26, 0.27, 0.27, 0.27, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.28, 0.29, 0.29, 0.29, 0.29, 0.3, 2.06, 2.07, 2.08, 2.13, 2.16, 2.18, 2.5]}}, "tps": 25.8}, {"name": "Llama3:latest", "score": 82.75181560283688, "exact": 76.17021276595744, "lo": 75.66936993244727, "hi": 88.09692372904227, "fmt": 99.57446808510639, "macro": 78.58429707602339, "ident": 75.177304964539, "modal": 88.93617021276594, "identU": 89.7196261682243, "identM": 29.411764705882355, "always": 97, "mixed": 21, "never": 23, "stwrong": 9, "mc": {"full": 62, "part": 28, "mix": 69, "zero": 11}, "rec": 70.29411764705881, "prec": 71.77177177177178, "tb": {"all": {"q1": 1.86, "med": 3.47, "q3": 3.9, "lo": 0.4, "hi": 5.72, "mean": 3.1413049645390068, "n": 705, "out": []}, "ok": {"q1": 1.58, "med": 3.34, "q3": 3.67, "lo": 0.4, "hi": 5.13, "mean": 2.841862197392924, "n": 537, "out": []}}, "tps": 7.8}, {"name": "mistral:7b", "score": 81.93164539007091, "exact": 75.46099290780141, "lo": 74.76169452465325, "hi": 87.40776507811282, "fmt": 96.59574468085106, "macro": 77.3104058479532, "ident": 70.2127659574468, "modal": 90.0709219858156, "identU": 84.11214953271028, "identM": 26.47058823529412, "always": 88, "mixed": 35, "never": 18, "stwrong": 11, "mc": {"full": 89, "part": 29, "mix": 52, "zero": 0}, "rec": 87.6470588235294, "prec": 80.3234501347709, "tb": {"all": {"q1": 2.2, "med": 3.88, "q3": 4.53, "lo": 0.39, "hi": 7.29, "mean": 3.6253191489361702, "n": 705, "out": [8.22, 8.74, 9.31, 9.54, 9.69, 11.18, 13.79, 17.03]}, "ok": {"q1": 1.8225, "med": 3.73, "q3": 4.23, "lo": 0.39, "hi": 6.55, "mean": 3.30421052631579, "n": 532, "out": []}}, "tps": 7.6}, {"name": "llama3.2:3b", "score": 77.2753475177305, "exact": 69.64539007092199, "lo": 69.68907461549132, "hi": 83.41478504913542, "fmt": 99.71631205673759, "macro": 76.54253801169591, "ident": 56.02836879432624, "modal": 80.28368794326241, "identU": 71.02803738317756, "identM": 8.823529411764707, "always": 76, "mixed": 43, "never": 22, "stwrong": 3, "mc": {"full": 39, "part": 32, "mix": 90, "zero": 9}, "rec": 66.76470588235294, "prec": 60.37234042553191, "tb": {"all": {"q1": 0.89, "med": 1.54, "q3": 1.73, "lo": 0.2, "hi": 2.94, "mean": 1.4203404255319148, "n": 705, "out": [3.02, 3.09, 3.35]}, "ok": {"q1": 0.755, "med": 1.48, "q3": 1.62, "lo": 0.2, "hi": 2.25, "mean": 1.2681670061099797, "n": 491, "out": []}}, "tps": 17.3}, {"name": "qwen3:0.6b", "score": 30.7011914893617, "exact": 24.822695035460992, "lo": 23.683728597642446, "hi": 38.742369981771205, "fmt": 96.17021276595744, "macro": 32.898031578947375, "ident": 19.858156028368796, "modal": 59.29078014184397, "identU": 26.168224299065418, "identM": 0.0, "always": 12, "mixed": 55, "never": 74, "stwrong": 16, "mc": {"full": 9, "part": 13, "mix": 111, "zero": 37}, "rec": 54.11764705882353, "prec": 32.22416812609457, "tb": {"all": {"q1": 0.28, "med": 0.35, "q3": 0.42, "lo": 0.08, "hi": 0.62, "mean": 0.38119148936170216, "n": 705, "out": [0.63, 0.64, 0.65, 0.67, 0.72, 0.72, 0.74, 0.75, 0.78, 0.81, 0.82, 0.84, 0.88, 0.91, 0.92, 0.96, 0.99, 1.01, 1.06, 1.07, 1.11, 1.12, 1.16, 1.23, 1.31]}, "ok": {"q1": 0.19, "med": 0.32, "q3": 0.36, "lo": 0.11, "hi": 0.61, "mean": 0.27725714285714287, "n": 175, "out": []}}, "tps": 73.3}], "tasks": [{"k": "SENT2", "l": "Sentiment (2)", "n": 16, "nc": 2, "mode": "unique"}, {"k": "SENT3", "l": "Sentiment (3)", "n": 18, "nc": 3, "mode": "unique"}, {"k": "THEME5", "l": "Thème (5)", "n": 20, "nc": 5, "mode": "unique"}, {"k": "THEME10", "l": "Thème (10)", "n": 30, "nc": 10, "mode": "unique"}, {"k": "INTENT5", "l": "Intention (5)", "n": 15, "nc": 5, "mode": "unique"}, {"k": "THEME5_AUTRE", "l": "Thème 5 + « Autre »", "n": 8, "nc": 6, "mode": "unique"}, {"k": "MULTI_AVIS", "l": "Avis multi-aspects", "n": 15, "nc": 6, "mode": "multiple"}, {"k": "MULTI_THEMES", "l": "Multi-thèmes", "n": 19, "nc": 10, "mode": "multiple"}], "hT": {"gemma4:e4b": {"INTENT5": 93.3, "MULTI_AVIS": 95.1, "MULTI_THEMES": 90.4, "SENT2": 100.0, "SENT3": 100.0, "THEME10": 100.0, "THEME5": 100.0, "THEME5_AUTRE": 100.0}, "gemma4:e2b": {"INTENT5": 90.7, "MULTI_AVIS": 93.3, "MULTI_THEMES": 84.6, "SENT2": 100.0, "SENT3": 100.0, "THEME10": 100.0, "THEME5": 97.0, "THEME5_AUTRE": 57.5}, "Llama3:latest": {"INTENT5": 73.3, "MULTI_AVIS": 69.3, "MULTI_THEMES": 59.4, "SENT2": 93.8, "SENT3": 98.9, "THEME10": 98.0, "THEME5": 91.0, "THEME5_AUTRE": 45.0}, "mistral:7b": {"INTENT5": 58.7, "MULTI_AVIS": 79.0, "MULTI_THEMES": 79.3, "SENT2": 93.8, "SENT3": 82.2, "THEME10": 94.0, "THEME5": 94.0, "THEME5_AUTRE": 37.5}, "llama3.2:3b": {"INTENT5": 54.7, "MULTI_AVIS": 56.5, "MULTI_THEMES": 53.1, "SENT2": 87.5, "SENT3": 84.4, "THEME10": 88.7, "THEME5": 95.0, "THEME5_AUTRE": 92.5}, "qwen3:0.6b": {"INTENT5": 17.3, "MULTI_AVIS": 32.9, "MULTI_THEMES": 27.2, "SENT2": 62.5, "SENT3": 33.3, "THEME10": 20.0, "THEME5": 25.0, "THEME5_AUTRE": 45.0}}, "hN": {"gemma4:e4b": {"2": 100.0, "3": 100.0, "5": 97.1, "6": 96.8, "10": 96.3}, "gemma4:e2b": {"2": 100.0, "3": 100.0, "5": 94.3, "6": 80.9, "10": 94.0}, "Llama3:latest": {"2": 93.8, "3": 98.9, "5": 83.4, "6": 60.9, "10": 83.0}, "mistral:7b": {"2": 93.8, "3": 82.2, "5": 78.9, "6": 64.6, "10": 88.3}, "llama3.2:3b": {"2": 87.5, "3": 84.4, "5": 77.7, "6": 69.0, "10": 74.9}, "qwen3:0.6b": {"2": 62.5, "3": 33.3, "5": 21.7, "6": 37.1, "10": 22.8}}, "hMode": {"gemma4:e4b": {"multiple": 92.5, "unique": 99.1}, "gemma4:e2b": {"multiple": 88.4, "unique": 95.0}, "Llama3:latest": {"multiple": 63.8, "unique": 88.8}, "mistral:7b": {"multiple": 79.2, "unique": 82.8}, "llama3.2:3b": {"multiple": 54.6, "unique": 84.5}, "qwen3:0.6b": {"multiple": 29.7, "unique": 31.0}}, "hD": {"gemma4:e4b": {"1": 100.0, "2": 97.0, "3": 94.9, "4": 100.0}, "gemma4:e2b": {"1": 96.5, "2": 91.1, "3": 92.7, "4": 93.3}, "Llama3:latest": {"1": 90.9, "2": 82.4, "3": 77.8, "4": 68.9}, "mistral:7b": {"1": 87.4, "2": 83.4, "3": 73.9, "4": 86.7}, "llama3.2:3b": {"1": 87.1, "2": 76.6, "3": 66.7, "4": 84.4}, "qwen3:0.6b": {"1": 31.7, "2": 31.9, "3": 28.3, "4": 31.1}}, "nN": {"10": 49, "5": 35, "6": 23, "3": 18, "2": 16}, "nD": {"2": 46, "1": 43, "3": 43, "4": 9}, "nMode": {"unique": 107, "multiple": 34}, "tD": {"gemma4:e4b": {"1": 2.92, "2": 3.09, "3": 3.12, "4": 2.77}, "gemma4:e2b": {"1": 1.5, "2": 1.56, "3": 1.59, "4": 1.42}, "Llama3:latest": {"1": 3.34, "2": 3.52, "3": 3.61, "4": 1.86}, "mistral:7b": {"1": 3.72, "2": 4.0, "3": 4.14, "4": 2.0}, "llama3.2:3b": {"1": 1.49, "2": 1.57, "3": 1.59, "4": 0.89}, "qwen3:0.6b": {"1": 0.34, "2": 0.36, "3": 0.37, "4": 0.25}}, "tT": {"gemma4:e4b": {"INTENT5": 2.8, "MULTI_AVIS": 3.61, "MULTI_THEMES": 3.8, "SENT2": 0.49, "SENT3": 3.09, "THEME10": 3.08, "THEME5": 2.77, "THEME5_AUTRE": 3.08}, "gemma4:e2b": {"INTENT5": 1.43, "MULTI_AVIS": 1.95, "MULTI_THEMES": 1.97, "SENT2": 0.29, "SENT3": 1.55, "THEME10": 1.57, "THEME5": 1.41, "THEME5_AUTRE": 1.54}, "Llama3:latest": {"INTENT5": 3.27, "MULTI_AVIS": 4.25, "MULTI_THEMES": 4.6, "SENT2": 0.74, "SENT3": 1.5, "THEME10": 3.67, "THEME5": 3.31, "THEME5_AUTRE": 3.34}, "mistral:7b": {"INTENT5": 3.79, "MULTI_AVIS": 4.59, "MULTI_THEMES": 5.16, "SENT2": 0.92, "SENT3": 1.57, "THEME10": 4.17, "THEME5": 3.62, "THEME5_AUTRE": 3.94}, "llama3.2:3b": {"INTENT5": 1.44, "MULTI_AVIS": 1.97, "MULTI_THEMES": 2.04, "SENT2": 0.37, "SENT3": 0.7, "THEME10": 1.64, "THEME5": 1.46, "THEME5_AUTRE": 1.48}, "qwen3:0.6b": {"INTENT5": 0.34, "MULTI_AVIS": 0.55, "MULTI_THEMES": 0.55, "SENT2": 0.13, "SENT3": 0.21, "THEME10": 0.37, "THEME5": 0.34, "THEME5_AUTRE": 0.34}}, "tMode": {"gemma4:e4b": {"multiple": 3.72, "unique": 2.88}, "gemma4:e2b": {"multiple": 1.96, "unique": 1.48}, "Llama3:latest": {"multiple": 4.51, "unique": 3.27}, "mistral:7b": {"multiple": 4.99, "unique": 3.66}, "llama3.2:3b": {"multiple": 2.0, "unique": 1.45}, "qwen3:0.6b": {"multiple": 0.55, "unique": 0.33}}, "ncase": 141, "nrun": 4230, "hard": [{"id": "INTENT5-103", "t": "INTENT5", "p": "Est-ce que votre logiciel fonctionne avec les ordinateurs Mac ?", "a": "Information commerciale", "s": 3}, {"id": "INTENT5-104", "t": "INTENT5", "p": "Je gère une équipe de vingt personnes : existe-t-il une formule adaptée avec des comptes partagés ?", "a": "Information commerciale", "s": 37}, {"id": "THEME5_AUTRE-058", "t": "THEME5_AUTRE", "p": "Pour réussir un gratin dauphinois, coupez les pommes de terre en fines rondelles et laissez cuire une heure à 180 °C.", "a": "Autre", "s": 37}, {"id": "THEME5_AUTRE-062", "t": "THEME5_AUTRE", "p": "Comment plier une chemise en moins de dix secondes ?", "a": "Autre", "s": 37}, {"id": "MULTI_THEMES-125", "t": "MULTI_THEMES", "p": "La cour a jugé illégal l'algorithme qui attribuait les places à l'université.", "a": "Justice + Technologie + Éducation", "s": 42}, {"id": "THEME5_AUTRE-061", "t": "THEME5_AUTRE", "p": "Le meilleur moment pour visiter Lisbonne est le printemps, quand les températures sont douces.", "a": "Autre", "s": 47}], "zero": 0};
+const $=i=>document.getElementById(i),f=(x,k=1)=>x.toFixed(k).replace('.',','),P=x=>Math.round(x)+' %';
+const COL=['#0e9f8e','#3b6fd8','#e8553d','#8b5cf6','#f0a12b','#d6409f'],M=D.m,col={};
+M.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach((m,i)=>col[m.name]=COL[i]);
+const g=n=>M.find(m=>m.name===n),seg=(c,n,t)=>n?`<i style="background:${c};width:${n/t*100}%" title="${n}"></i>`:'';
+const row=(n,b,v)=>`<div class="row"><span class="n">${n}</span><div class="bar">${b}</div><span class="v">${v}</span></div>`;
+const sh=v=>`background:rgba(14,159,142,${.08+v/100*.92});color:${v>55?'#fff':'#0f1b2d'}`;
+const tsh=v=>{const a=Math.max(0,Math.min(1,Math.log(v/.2)/Math.log(30)));return `background:rgba(232,85,61,${.08+a*.8});color:${a>.6?'#fff':'#0f1b2d'}`};
+function heat(cols,get,fmt,style){let h=`<table class="hm"><thead><tr><th></th>${cols.map(c=>`<th>${c.l}${c.s?`<small>${c.s}</small>`:''}</th>`).join('')}</tr></thead><tbody>`;
+M.forEach(m=>{h+=`<tr><td>${m.name}</td>${cols.map(c=>{const v=get(m.name,c.k);return v==null?'<td></td>':`<td style="${style(v)}">${fmt(v)}</td>`}).join('')}</tr>`});return h+'</tbody></table>'}
+const pctf=v=>Math.round(v)+'%',tf=v=>f(v,2)+' s';
+$('f1').textContent=D.nrun.toLocaleString('fr-FR');$('f2').textContent=P(M[0].score);
+// 1
+const lo=Math.min(...M.map(m=>m.lo)),sc=v=>(v-0)/100*100;
+$('c1').innerHTML=M.map(m=>`<div class="row"><span class="n">${m.name}</span><div class="bar" style="position:relative"><i style="background:${col[m.name]};width:${m.score}%"></i><i style="position:absolute;left:${m.lo}%;width:${m.hi-m.lo}%;top:11px;height:2px;background:#0f1b2d"></i></div><span class="v">${f(m.score)} %</span></div>`).join('');
+$('c1b').innerHTML=`<table><thead><tr><th>Modèle</th><th>Score</th><th>IC 95 %</th><th>Exact</th><th>Macro tâches</th><th>Format respecté</th></tr></thead><tbody>${M.map((m,i)=>`<tr><td>${i+1}. ${m.name}</td><td><b>${f(m.score)} %</b></td><td>${f(m.lo,0)}–${f(m.hi,0)} %</td><td>${f(m.exact)} %</td><td>${f(m.macro)} %</td><td>${f(m.fmt)} %</td></tr>`).join('')}</tbody></table>`;
+// 2
+$('c2a').innerHTML=heat(D.tasks.map(t=>({k:t.k,l:t.l,s:`${t.n} prop., ${t.nc} mod.${t.mode=='multiple'?' (multi)':''}`})),(m,k)=>D.hT[m][k],pctf,sh);
+$('c2b').innerHTML=heat(Object.keys(D.nN).map(k=>({k,l:k+' modalités',s:D.nN[k]+' prop.'})),(m,k)=>D.hN[m][k],pctf,sh);
+$('c2c').innerHTML=heat([{k:'unique',l:'Modalité unique',s:D.nMode.unique+' prop.'},{k:'multiple',l:'Modalités multiples',s:D.nMode.multiple+' prop.'}],(m,k)=>D.hMode[m][k],pctf,sh);
+$('c2d').innerHTML=heat(Object.keys(D.nD).map(k=>({k,l:'Niveau '+k,s:D.nD[k]+' prop.'})),(m,k)=>D.hD[m][k],pctf,sh);
+$('c2e').innerHTML=M.map(m=>row(m.name,seg('var(--ok)',m.mc.full,170)+seg('var(--var)',m.mc.part,170)+seg('var(--to)',m.mc.mix,170)+seg('var(--ko)',m.mc.zero,170),`<small>R ${P(m.rec)} · P ${P(m.prec)}</small>`)).join('').replace(/class="row"/g,'class="row" style="grid-template-columns:150px 1fr 120px"');
+$('c2f').innerHTML=D.hard.map(h=>`<div class="q"><div>${h.p}<br><small>${h.t} · attendu : <code>${h.a}</code></small></div><div class="row" style="grid-template-columns:1fr 50px;margin:0;min-width:0"><div class="bar"><i style="background:var(--ok);width:${h.s}%"></i></div><span class="v">${h.s}%</span></div></div>`).join('');
+// 3
+$('c3a').innerHTML=M.map(m=>row(m.name,seg('var(--ok)',m.always,141)+seg('var(--to)',m.mixed,141)+seg('var(--ko)',m.never,141),`${m.always}/141`)).join('')+`<p class="sub" style="margin-top:14px">Parmi les « 5 sur 5 faux », certains sont très stables : ${M.filter(m=>m.stwrong).map(m=>m.name+' '+m.stwrong).join(' · ')} propositions toujours ratées de la même façon.</p>`;
+$('c3b').innerHTML=`<table><thead><tr><th>Modèle</th><th>Toutes</th><th>Modalité unique</th><th>Modalités multiples</th><th>Part de la réponse majoritaire</th></tr></thead><tbody>${M.slice().sort((a,b)=>b.ident-a.ident).map(m=>`<tr><td>${m.name}</td><td><b>${P(m.ident)}</b></td><td>${P(m.identU)}</td><td>${P(m.identM)}</td><td>${P(m.modal)}</td></tr>`).join('')}</tbody></table>`;
+// 4 boxplots
+function box(key,id){const T=M.slice().sort((a,b)=>a.tb[key].med-b.tb[key].med),W=900,L=150,R=30,rh=42,H=T.length*rh+46,lg=Math.log(.06),hg=Math.log(20),X=t=>L+(Math.log(t)-lg)/(hg-lg)*(W-L-R);
+let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Boîtes à moustaches">`;
+[.1,.2,.5,1,2,5,10,20].forEach(t=>s+=`<line x1="${X(t)}" x2="${X(t)}" y1="8" y2="${H-30}" stroke="#e6eaf2"/><text x="${X(t)}" y="${H-10}" font-size="12" fill="#5b6678" text-anchor="middle">${t} s</text>`);
+T.forEach((m,i)=>{const y=24+i*rh,t=m.tb[key],c=col[m.name];
+s+=`<text x="${L-12}" y="${y+5}" font-size="13" font-weight="600" text-anchor="end">${m.name}</text><line x1="${X(t.lo)}" x2="${X(t.hi)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="2"/><line x1="${X(t.lo)}" x2="${X(t.lo)}" y1="${y-6}" y2="${y+6}" stroke="${c}" stroke-width="2"/><line x1="${X(t.hi)}" x2="${X(t.hi)}" y1="${y-6}" y2="${y+6}" stroke="${c}" stroke-width="2"/><rect x="${X(t.q1)}" y="${y-11}" width="${Math.max(3,X(t.q3)-X(t.q1))}" height="22" rx="4" fill="${c}" fill-opacity=".28" stroke="${c}" stroke-width="2"/><line x1="${X(t.med)}" x2="${X(t.med)}" y1="${y-11}" y2="${y+11}" stroke="${c}" stroke-width="4"/>`;
+t.out.forEach(o=>s+=`<circle cx="${X(o)}" cy="${y}" r="3" fill="none" stroke="${c}" stroke-width="1.4"/>`)});
+$(id).innerHTML=s+'</svg>'}
+box('all','c4a');box('ok','c4b');
+$('c4c').innerHTML=`<table><thead><tr><th>Modèle</th><th>Médiane (toutes)</th><th>Moyenne (toutes)</th><th>Médiane (bonnes)</th><th>Moyenne (bonnes)</th><th>Écart interquartile (toutes)</th><th>Tokens/s</th></tr></thead><tbody>${M.slice().sort((a,b)=>a.tb.all.med-b.tb.all.med).map(m=>{const a=m.tb.all,k=m.tb.ok;return `<tr><td>${m.name}</td><td><b>${tf(a.med)}</b></td><td>${tf(a.mean)}</td><td>${tf(k.med)}</td><td>${tf(k.mean)}</td><td>${tf(a.q3-a.q1)}</td><td>${f(m.tps,0)}</td></tr>`}).join('')}</tbody></table>`;
+$('c4d').innerHTML=heat(Object.keys(D.nD).map(k=>({k,l:'Niveau '+k})),(m,k)=>D.tD[m][k],tf,tsh);
+$('c4e').innerHTML=heat(D.tasks.map(t=>({k:t.k,l:t.l})),(m,k)=>D.tT[m][k],tf,tsh);
+const SW=900,SH=380,sl=60,sb=50,xs=t=>sl+(Math.log(t)-Math.log(.2))/(Math.log(8)-Math.log(.2))*(SW-sl-120),ys=v=>SH-sb-v/100*(SH-sb-20);
+let z=`<svg viewBox="0 0 ${SW} ${SH}" width="100%" role="img" aria-label="Vitesse contre justesse">`;
+[.2,.5,1,2,4,8].forEach(t=>z+=`<line x1="${xs(t)}" x2="${xs(t)}" y1="20" y2="${SH-sb}" stroke="#e6eaf2"/><text x="${xs(t)}" y="${SH-sb+18}" font-size="12" fill="#5b6678" text-anchor="middle">${t} s</text>`);
+[0,25,50,75,100].forEach(v=>z+=`<line x1="${sl}" x2="${SW-30}" y1="${ys(v)}" y2="${ys(v)}" stroke="#e6eaf2"/><text x="${sl-8}" y="${ys(v)+4}" font-size="12" fill="#5b6678" text-anchor="end">${v} %</text>`);
+z+=`<text x="${SW/2}" y="${SH-6}" font-size="13" fill="#5b6678" text-anchor="middle">Temps médian par réponse (échelle log)</text><text transform="translate(16 ${SH/2}) rotate(-90)" font-size="13" fill="#5b6678" text-anchor="middle">Score global</text>`;
+M.forEach(m=>{const x=xs(m.tb.all.med),y=ys(m.score);z+=`<circle cx="${x}" cy="${y}" r="9" fill="${col[m.name]}" fill-opacity=".85" stroke="#fff" stroke-width="2"/><text x="${x+13}" y="${y+4}" font-size="12.5" font-weight="600">${m.name}</text>`});
+$('c4f').innerHTML=z+'</svg>';
+// 5
+const cat=v=>v>=90?1:v>=75?2:v>=50?3:4,lab=['','Fiable','À contrôler','Fragile','Non crédible'];
+let v=`<table class="hm"><thead><tr><th></th>${D.tasks.map(t=>`<th>${t.l}</th>`).join('')}<th style="text-align:left">Crédible pour</th></tr></thead><tbody>`;
+M.forEach(m=>{const ok=D.tasks.filter(t=>D.hT[m.name][t.k]>=90).map(t=>t.l);
+v+=`<tr><td>${m.name}</td>${D.tasks.map(t=>{const x=D.hT[m.name][t.k],c=cat(x);return `<td class="v${c}" style="font-size:12px;line-height:1.3">${lab[c]}<br>${Math.round(x)}%</td>`}).join('')}<td class="t">${ok.length?ok.join(', '):'Aucune tâche'}</td></tr>`});
+$('c5a').innerHTML=v+'</tbody></table>';
+const e4=g('gemma4:e4b'),e2=g('gemma4:e2b'),l3=g('Llama3:latest'),mi=g('mistral:7b'),l32=g('llama3.2:3b'),q=g('qwen3:0.6b'),H=D.hT;
+const L=[
+['gemma4:e4b : le seul crédible partout',`${f(e4.score)} % de score global, ${P(H['gemma4:e4b'].MULTI_AVIS)} sur les avis multi-aspects et ${P(H['gemma4:e4b'].MULTI_THEMES)} en multi-thèmes (rappel ${P(e4.rec)}, précision ${P(e4.prec)}). 100 % en sentiment, thème et gestion de la modalité « Autre ». Réponses identiques aux 5 passages dans ${P(e4.ident)} des cas. Contrepartie : ${f(e4.tb.all.med)} s en médiane, soit le double de gemma4:e2b.`],
+['gemma4:e2b : le meilleur compromis vitesse-qualité',`${f(e2.score)} % pour ${f(e2.tb.all.med)} s en médiane, soit deux fois plus rapide que e4b. Parfait en sentiment et en thème (10 classes), ${P(H['gemma4:e2b'].INTENT5)} en intention et ${P(H['gemma4:e2b'].MULTI_AVIS)} en avis multi-aspects. Point faible : la classe « Autre » (${P(H['gemma4:e2b'].THEME5_AUTRE)}), il range les textes hors sujet dans « Divertissement ».`],
+['Llama3 et mistral:7b : crédibles pour du simple, pas pour du multiple',`Llama3 est très bon en sentiment à 3 classes (${P(H['Llama3:latest'].SENT3)}) et en thème à 10 classes (${P(H['Llama3:latest'].THEME10)}), mais tombe à ${P(H['Llama3:latest'].MULTI_THEMES)} en multi-thèmes. mistral:7b retrouve bien les modalités (rappel ${P(mi.rec)}) mais en ajoute trop (précision ${P(mi.prec)}) ; il est aussi le plus lent et le plus irrégulier. Tous deux ratent la classe « Autre » (${P(H['Llama3:latest'].THEME5_AUTRE)} et ${P(H['mistral:7b'].THEME5_AUTRE)}).`],
+['llama3.2:3b : rapide, mais trop instable',`${f(l32.tb.all.med)} s en médiane, correct en thème à 5 classes (${P(H['llama3.2:3b'].THEME5)}) et sur « Autre » (${P(H['llama3.2:3b'].THEME5_AUTRE)}). Mais seulement ${P(l32.ident)} de ses réponses sont identiques aux 5 passages et ${P(H['llama3.2:3b'].MULTI_AVIS)} sur les avis multi-aspects : à réserver à du tri grossier avec relecture.`],
+['qwen3:0.6b : à écarter',`${f(q.score)} % de score, ${P(H['qwen3:0.6b'].SENT3)} en sentiment à 3 classes (il répond « Positif » presque tout le temps) et ${P(H['qwen3:0.6b'].SENT2)} en sentiment binaire, soit à peine plus que le hasard. Le plus rapide (${f(q.tb.all.med)} s), mais cette vitesse ne sert à rien.`],
+['Le nombre de modalités et le mode comptent plus que la difficulté',`Les modèles moyens sont à l'aise à 2 ou 3 modalités puis décrochent dès que le choix devient multiple ou qu'il faut reconnaître « Autre ». Les modalités multiples sont aussi plus lentes (+30 à 40 % pour les cinq premiers modèles). Le niveau de difficulté affecte peu les meilleurs modèles.`],
+['En pratique',`Classement binaire ou ternaire : gemma4:e2b suffit (rapide, 100 %), et Llama3 reste acceptable. Thème à choix unique : gemma4 (e2b ou e4b). Intention et choix multiples : gemma4:e4b, ou e2b avec contrôle. Si le temps compte peu : gemma4:e4b partout.`]];
+$('ins').innerHTML=L.map(([a,b])=>`<li><b>${a}</b><p>${b}</p></li>`).join('');
+</script></body></html>
